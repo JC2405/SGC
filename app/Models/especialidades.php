@@ -12,4 +12,11 @@ class Especialidad extends Model
         'nombre', 
         'descripcion'
     ];
+
+    public $timestamps = true;
+
+    public function doctores()
+    {
+        return $this->hasMany(Doctor::class, 'especialidad_id');
+    }
 }
