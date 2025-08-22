@@ -18,7 +18,7 @@ class doctores extends Model
 
     public function especialidad()
     {
-        return $this->belongsTo(\App\Models\Especialidad::class, 'especialidad_id');
+        return $this->belongsTo(\App\Models\especialidades::class, 'especialidad_id');
     }
 
     public function citas()

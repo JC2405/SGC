@@ -44,3 +44,8 @@ Route::delete("eliminarCita/{id}", [CitasController::class, 'destroy']);
 Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente']);
 Route::get("citasPorDoctor/{doctor_id}", [CitasController::class, 'porDoctor']);
 Route::patch("cambiarEstadoCita/{id}", [CitasController::class, 'cambiarEstado']);
+
+
+
+
+ 

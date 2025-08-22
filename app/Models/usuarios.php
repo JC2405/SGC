@@ -16,9 +16,12 @@ class usuarios extends Model
         'fecha_nacimiento',
     ];
 
+    protected $casts = [
+        'fecha_nacimiento' => 'date'
+    ];
+
     public function citas()
     {
-        // referencia totalmente calificada para evitar errores de importación
-        return $this->hasMany(\App\Models\Cita::class, 'paciente_id');
+        return $this->hasMany(\App\Models\citas::class, 'paciente_id');
     }
 }
