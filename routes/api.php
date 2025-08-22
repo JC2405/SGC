@@ -35,6 +35,7 @@ Route::delete("eliminarDoctor/{id}", [DoctoresController::class, 'destroy']);
 Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctoresController::class, 'porEspecialidad']);
 
 //CITAS
+//ENDPOINTS
 Route::get("listarCitas", [CitasController::class, 'index']);
 Route::post("crearCita", [CitasController::class, 'store']);
 Route::get("cita/{id}", [CitasController::class, 'show']);
