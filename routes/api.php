@@ -47,5 +47,15 @@ Route::patch("cambiarEstadoCita/{id}", [CitasController::class, 'cambiarEstado']
 
 
 
+// Rutas para EPS
+Route::apiResource('eps', EpsController::class);
+
+// Rutas para Cubículos
+Route::apiResource('cubiculos', CubiculosController::class);
+Route::get('cubiculos/disponibles/list', [CubiculosController::class, 'disponibles']);
+Route::get('cubiculos/tipo/{tipo}', [CubiculosController::class, 'porTipo']);
+
+
+
 
  

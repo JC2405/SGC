@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-      Schema::create('citas', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('paciente_id')->constrained('usuarios')->onDelete('cascade');
-    $table->foreignId('doctor_id')->constrained('doctores')->onDelete('cascade');
-    $table->dateTime('fecha_hora');
-    $table->enum('estado', ['pendiente', 'confirmada', 'cancelada', 'atendida'])->default('pendiente');
-    $table->timestamps();
-});
-
+        Schema::create('citas', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('paciente_id')->constrained('usuarios')->onDelete('cascade');
+            $table->foreignId('doctor_id')->constrained('doctores')->onDelete('cascade');
+            $table->dateTime('fecha_hora');
+            $table->enum('estado', ['pendiente', 'confirmada', 'cancelada', 'atendida'])->default('pendiente');
+            $table->timestamps();
+        });
     }
 
     /**
