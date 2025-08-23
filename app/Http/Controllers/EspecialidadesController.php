@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\especialidades; // Using consistent model name
+use App\Models\Especialidad; // Corregido nombre del modelo
 
 class EspecialidadesController extends Controller
 {
     public function index()
     {
         try {
-            $especialidades = especialidades::all();
+            $especialidades = Especialidad::all();
             return response()->json([
                 'success' => true,
                 'data' => $especialidades
@@ -39,7 +39,7 @@ class EspecialidadesController extends Controller
                 ], 422);
             }
 
-            $especialidad = especialidades::create($request->all());
+            $especialidad = Especialidad::create($request->all());
             return response()->json([
                 'success' => true,
                 'data' => $especialidad,
@@ -56,7 +56,7 @@ class EspecialidadesController extends Controller
     public function show($id)
     {
         try {
-            $especialidad = especialidades::find($id);
+            $especialidad = Especialidad::find($id);
             if (!$especialidad) {
                 return response()->json([
                     'success' => false,
@@ -79,7 +79,7 @@ class EspecialidadesController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $especialidad = especialidades::find($id);
+            $especialidad = Especialidad::find($id);
             if (!$especialidad) {
                 return response()->json([
                     'success' => false,
@@ -116,7 +116,7 @@ class EspecialidadesController extends Controller
     public function destroy($id)
     {
         try {
-            $especialidad = especialidades::find($id);
+            $especialidad = Especialidad::find($id);
             if (!$especialidad) {
                 return response()->json([
                     'success' => false,

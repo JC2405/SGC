@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class doctores extends Model
+class Doctor extends Model
 {
     protected $table = 'doctores';
 
@@ -18,11 +18,11 @@ class doctores extends Model
 
     public function especialidad()
     {
-        return $this->belongsTo(\App\Models\especialidades::class, 'especialidad_id');
+        return $this->belongsTo(Especialidad::class, 'especialidad_id');
     }
 
     public function citas()
     {
-        return $this->hasMany(\App\Models\citas::class, 'doctor_id');
+        return $this->hasMany(Cita::class, 'doctor_id');
     }
 }

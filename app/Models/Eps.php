@@ -2,38 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Eps extends Model
+class Especialidad extends Model
 {
-    use HasFactory;
-
-    protected $table = 'eps';
+    protected $table = 'especialidades';
 
     protected $fillable = [
-        'nombre',
-        'codigo',
-        'nit',
-        'telefono',
-        'email',
-        'direccion',
-        'estado'
+        'nombre', 
+        'descripcion'
     ];
 
-    /**
-     * Relación con usuarios
-     */
-    public function usuarios()
-    {
-        return $this->hasMany(Usuarios::class);
-    }
+    public $timestamps = true;
 
-    /**
-     * Scope para EPS activas
-     */
-    public function scopeActivas($query)
+    public function doctores()
     {
-        return $query->where('estado', 'activa');
+        return $this->hasMany(Doctor::class, 'especialidad_id');
     }
 }

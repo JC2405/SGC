@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('cubiculos', function (Blueprint $table) {
             $table->id();
-            $table->string('numero');
-            $table->string('nombre');
-            $table->text('descripcion')->nullable();
-            $table->boolean('disponible')->default(true);
-            $table->string('ubicacion')->nullable();
+            $table->string('numero')->unique();
+            $table->string('nombre')->nullable();
+            $table->enum('tipo', ['consulta', 'procedimientos', 'emergencia'])->default('consulta'); // Corregido campo tipo
+            $table->text('equipamiento')->nullable(); // Agregado campo equipamiento
+            $table->enum('estado', ['disponible', 'ocupado', 'mantenimiento'])->default('disponible'); // Corregido campo estado
+            $table->integer('capacidad')->default(1); // Agregado campo capacidad
             $table->timestamps();
         });
     }

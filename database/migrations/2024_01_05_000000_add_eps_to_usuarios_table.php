@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('usuarios', function (Blueprint $table) {
-            $table->foreignId('eps_id')->nullable()->constrained('eps')->onDelete('set null');
-            $table->string('numero_afiliacion')->nullable();
+            if (!Schema::hasColumn('usuarios', 'eps_id')) {
+                $table->unsignedBigInteger('eps_id')->nullable();
+                $table->foreign('eps_id')->references('id')->on('eps')->onDelete('set null');
+            }
         });
     }
 
@@ -23,8 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('usuarios', function (Blueprint $table) {
-            $table->dropForeign(['eps_id']);
-            $table->dropColumn(['eps_id', 'numero_afiliacion']);
+            if (Schema::hasColumn('usuarios', 'eps_id')) {
+                $table->dropForeign(['eps_id']);
+                $table->dropColumn('eps_id');
+            }
         });
     }
 };

@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('eps', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
+            $table->string('nombre')->unique();
             $table->string('codigo')->unique();
+            $table->string('nit')->unique()->nullable(); // Agregado campo NIT
             $table->string('telefono')->nullable();
             $table->string('email')->nullable();
             $table->text('direccion')->nullable();
-            $table->boolean('activo')->default(true);
+            $table->enum('estado', ['activa', 'inactiva'])->default('activa'); // Corregido campo estado
             $table->timestamps();
         });
     }

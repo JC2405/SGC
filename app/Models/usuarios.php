@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class usuarios extends Model
+class Usuario extends Model
 {
     protected $table = 'usuarios';
 
@@ -14,6 +14,8 @@ class usuarios extends Model
         'email', 
         'telefono',
         'fecha_nacimiento',
+        'eps_id',
+        'numero_afiliacion'
     ];
 
     protected $casts = [
@@ -22,6 +24,11 @@ class usuarios extends Model
 
     public function citas()
     {
-        return $this->hasMany(\App\Models\citas::class, 'paciente_id');
+        return $this->hasMany(Cita::class, 'paciente_id');
+    }
+
+    public function eps()
+    {
+        return $this->belongsTo(Eps::class);
     }
 }

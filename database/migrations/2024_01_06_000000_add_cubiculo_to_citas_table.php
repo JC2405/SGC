@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('citas', function (Blueprint $table) {
-            $table->foreignId('cubiculo_id')->nullable()->constrained('cubiculos')->onDelete('set null');
-            $table->text('observaciones')->nullable();
+            if (!Schema::hasColumn('citas', 'cubiculo_id')) {
+                $table->unsignedBigInteger('cubiculo_id')->nullable();
+                $table->foreign('cubiculo_id')->references('id')->on('cubiculos')->onDelete('set null');
+            }
         });
     }
 
@@ -23,8 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('citas', function (Blueprint $table) {
-            $table->dropForeign(['cubiculo_id']);
-            $table->dropColumn(['cubiculo_id', 'observaciones']);
+            if (Schema::hasColumn('citas', 'cubiculo_id')) {
+                $table->dropForeign(['cubiculo_id']);
+                $table->dropColumn('cubiculo_id');
+            }
         });
     }
 };

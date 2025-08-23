@@ -74,4 +74,38 @@ class EpsController extends Controller
         $eps->delete();
         return response()->json(['message' => 'EPS eliminada correctamente']);
     }
+
+    /**
+     * Obtener EPS activas
+     */
+    public function activas()
+    {
+        $eps = Eps::activas()->get();
+        return response()->json($eps);
+    }
+
+    /**
+     * Obtener EPS inactivas
+     */
+    public function inactivas()
+    {
+        $eps = Eps::where('estado', 'inactiva')->get();
+        return response()->json($eps);
+    }
+
+    /**
+     * Cambiar estado de EPS
+     */
+    public function cambiarEstado(Request $request, $id)
+    {
+        $eps = Eps::findOrFail($id);
+        
+        $request->validate([
+            'estado' => 'required|in:activa,inactiva'
+        ]);
+
+        $eps->update(['estado' => $request->estado]);
+        return response()->json($eps);
+    }
 }
+    

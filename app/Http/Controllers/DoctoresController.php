@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\doctores;
+use App\Models\Doctor; // Corregido nombre del modelo
 
 class DoctoresController extends Controller
 {
     public function index()
     {
-        $doctores = doctores::with('especialidad')->get();
+        $doctores = Doctor::with('especialidad')->get();
         return response()->json($doctores);
     }
 
@@ -28,14 +28,14 @@ class DoctoresController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $doctor = doctores::create($request->all());
+        $doctor = Doctor::create($request->all());
         $doctor->load('especialidad');
         return response()->json($doctor, 201);
     }
 
     public function show($id)
     {
-        $doctor = doctores::with('especialidad')->find($id);
+        $doctor = Doctor::with('especialidad')->find($id);
         if (!$doctor) {
             return response()->json(['message' => 'Doctor no encontrado'], 404);
         }
@@ -44,7 +44,7 @@ class DoctoresController extends Controller
 
     public function update(Request $request, $id)
     {
-        $doctor = doctores::find($id);
+        $doctor = Doctor::find($id);
         if (!$doctor) {
             return response()->json(['message' => 'Doctor no encontrado'], 404);
         }
@@ -68,7 +68,7 @@ class DoctoresController extends Controller
 
     public function destroy($id)
     {
-        $doctor = doctores::find($id);
+        $doctor = Doctor::find($id);
         if (!$doctor) {
             return response()->json(['message' => 'Doctor no encontrado'], 404);
         }
@@ -80,7 +80,7 @@ class DoctoresController extends Controller
     // Método adicional para obtener doctores por especialidad
     public function porEspecialidad($especialidad_id)
     {
-        $doctores = doctores::where('especialidad_id', $especialidad_id)
+        $doctores = Doctor::where('especialidad_id', $especialidad_id)
                            ->with('especialidad')
                            ->get();
         return response()->json($doctores);

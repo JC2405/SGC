@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator; // 👈 IMPORTANTE
-use App\Models\usuarios; // 👈 modelo
+use Illuminate\Support\Facades\Validator;
+use App\Models\Usuario; // Corregido nombre del modelo
 
 class UsuariosController extends Controller
 {
     public function index()
     {
-        $usuarios = usuarios::all();
+        $usuarios = Usuario::with('eps')->get();
         return response()->json($usuarios);
     }
 
@@ -22,29 +22,31 @@ class UsuariosController extends Controller
             'email' => 'required|email|unique:usuarios,email',
             'telefono' => 'required|string|max:20',
             'fecha_nacimiento' => 'required|date',
+            'eps_id' => 'nullable|exists:eps,id',
+            'numero_afiliacion' => 'nullable|string|max:50'
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $usuario = usuarios::create($request->all());
+        $usuario = Usuario::create($request->all());
+        $usuario->load('eps');
         return response()->json($usuario, 201); 
     }
 
     public function show(string $id)
     {
-        $usuario = usuarios::find($id);
+        $usuario = Usuario::with('eps')->find($id);
         if (!$usuario) {
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
         return response()->json($usuario);
     }
 
-
     public function update(Request $request, string $id)
     {
-        $usuario = usuarios::find($id);
+        $usuario = Usuario::find($id);
         if (!$usuario) {
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
@@ -55,6 +57,8 @@ class UsuariosController extends Controller
             'email' => 'email|unique:usuarios,email,' . $usuario->id,
             'telefono' => 'string|max:20',
             'fecha_nacimiento' => 'date',
+            'eps_id' => 'nullable|exists:eps,id',
+            'numero_afiliacion' => 'nullable|string|max:50'
         ]);
 
         if ($validator->fails()) {
@@ -62,12 +66,13 @@ class UsuariosController extends Controller
         }
 
         $usuario->update($request->all());
+        $usuario->load('eps');
         return response()->json($usuario);
     }
 
     public function destroy(string $id)
     {
-        $usuario = usuarios::find($id);
+        $usuario = Usuario::find($id);
         if (!$usuario) {
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }

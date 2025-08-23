@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class citas extends Model
+class Cita extends Model
 {
     protected $table = 'citas';
 
@@ -12,7 +12,9 @@ class citas extends Model
         'paciente_id',
         'doctor_id',
         'fecha_hora',
-        'estado'
+        'estado',
+        'cubiculo_id',
+        'observaciones'
     ];
 
     protected $casts = [
@@ -21,11 +23,16 @@ class citas extends Model
 
     public function paciente()
     {
-        return $this->belongsTo(\App\Models\usuarios::class, 'paciente_id');
+        return $this->belongsTo(Usuario::class, 'paciente_id');
     }
 
     public function doctor()
     {
-        return $this->belongsTo(\App\Models\doctores::class, 'doctor_id');
+        return $this->belongsTo(Doctor::class, 'doctor_id');
+    }
+
+    public function cubiculo()
+    {
+        return $this->belongsTo(Cubiculo::class, 'cubiculo_id');
     }
 }

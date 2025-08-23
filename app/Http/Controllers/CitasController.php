@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\citas;
+use App\Models\Cita; // Corregido nombre del modelo
 use Carbon\Carbon;
 
 class CitasController extends Controller
 {
     public function index()
     {
-        $citas = citas::with(['paciente', 'doctor.especialidad'])->get();
+        $citas = Cita::with(['paciente', 'doctor.especialidad', 'cubiculo'])->get();
         return response()->json($citas);
     }
 
@@ -21,7 +21,9 @@ class CitasController extends Controller
             'paciente_id' => 'required|exists:usuarios,id',
             'doctor_id' => 'required|exists:doctores,id',
             'fecha_hora' => 'required|date|after:now',
-            'estado' => 'in:pendiente,confirmada,cancelada,atendida'
+            'estado' => 'in:pendiente,confirmada,cancelada,atendida',
+            'cubiculo_id' => 'nullable|exists:cubiculos,id',
+            'observaciones' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -30,7 +32,7 @@ class CitasController extends Controller
 
         // Verificar disponibilidad del doctor
         $fechaHora = Carbon::parse($request->fecha_hora);
-        $citaExistente = citas::where('doctor_id', $request->doctor_id)
+        $citaExistente = Cita::where('doctor_id', $request->doctor_id)
                              ->where('fecha_hora', $fechaHora)
                              ->whereIn('estado', ['pendiente', 'confirmada'])
                              ->first();
@@ -39,14 +41,14 @@ class CitasController extends Controller
             return response()->json(['message' => 'El doctor no está disponible en esa fecha y hora'], 409);
         }
 
-        $cita = citas::create($request->all());
-        $cita->load(['paciente', 'doctor.especialidad']);
+        $cita = Cita::create($request->all());
+        $cita->load(['paciente', 'doctor.especialidad', 'cubiculo']);
         return response()->json($cita, 201);
     }
 
     public function show($id)
     {
-        $cita = citas::with(['paciente', 'doctor.especialidad'])->find($id);
+        $cita = Cita::with(['paciente', 'doctor.especialidad', 'cubiculo'])->find($id);
         if (!$cita) {
             return response()->json(['message' => 'Cita no encontrada'], 404);
         }
@@ -55,7 +57,7 @@ class CitasController extends Controller
 
     public function update(Request $request, $id)
     {
-        $cita = citas::find($id);
+        $cita = Cita::find($id);
         if (!$cita) {
             return response()->json(['message' => 'Cita no encontrada'], 404);
         }
@@ -64,7 +66,9 @@ class CitasController extends Controller
             'paciente_id' => 'exists:usuarios,id',
             'doctor_id' => 'exists:doctores,id',
             'fecha_hora' => 'date|after:now',
-            'estado' => 'in:pendiente,confirmada,cancelada,atendida'
+            'estado' => 'in:pendiente,confirmada,cancelada,atendida',
+            'cubiculo_id' => 'nullable|exists:cubiculos,id',
+            'observaciones' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -76,7 +80,7 @@ class CitasController extends Controller
             $fechaHora = Carbon::parse($request->fecha_hora ?? $cita->fecha_hora);
             $doctorId = $request->doctor_id ?? $cita->doctor_id;
             
-            $citaExistente = citas::where('doctor_id', $doctorId)
+            $citaExistente = Cita::where('doctor_id', $doctorId)
                                  ->where('fecha_hora', $fechaHora)
                                  ->where('id', '!=', $id)
                                  ->whereIn('estado', ['pendiente', 'confirmada'])
@@ -88,13 +92,13 @@ class CitasController extends Controller
         }
 
         $cita->update($request->all());
-        $cita->load(['paciente', 'doctor.especialidad']);
+        $cita->load(['paciente', 'doctor.especialidad', 'cubiculo']);
         return response()->json($cita);
     }
 
     public function destroy($id)
     {
-        $cita = citas::find($id);
+        $cita = Cita::find($id);
         if (!$cita) {
             return response()->json(['message' => 'Cita no encontrada'], 404);
         }
@@ -106,8 +110,8 @@ class CitasController extends Controller
     // Métodos adicionales útiles
     public function porPaciente($paciente_id)
     {
-        $citas = citas::where('paciente_id', $paciente_id)
-                     ->with(['doctor.especialidad'])
+        $citas = Cita::where('paciente_id', $paciente_id)
+                     ->with(['doctor.especialidad', 'cubiculo'])
                      ->orderBy('fecha_hora', 'desc')
                      ->get();
         return response()->json($citas);
@@ -115,8 +119,8 @@ class CitasController extends Controller
 
     public function porDoctor($doctor_id)
     {
-        $citas = citas::where('doctor_id', $doctor_id)
-                     ->with(['paciente'])
+        $citas = Cita::where('doctor_id', $doctor_id)
+                     ->with(['paciente', 'cubiculo'])
                      ->orderBy('fecha_hora', 'asc')
                      ->get();
         return response()->json($citas);
@@ -124,7 +128,7 @@ class CitasController extends Controller
 
     public function cambiarEstado(Request $request, $id)
     {
-        $cita = citas::find($id);
+        $cita = Cita::find($id);
         if (!$cita) {
             return response()->json(['message' => 'Cita no encontrada'], 404);
         }
@@ -138,7 +142,7 @@ class CitasController extends Controller
         }
 
         $cita->update(['estado' => $request->estado]);
-        $cita->load(['paciente', 'doctor.especialidad']);
+        $cita->load(['paciente', 'doctor.especialidad', 'cubiculo']);
         return response()->json($cita);
     }
 }

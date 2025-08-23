@@ -23,7 +23,7 @@ class Cubiculo extends Model
      */
     public function citas()
     {
-        return $this->hasMany(Citas::class);
+        return $this->hasMany(Cita::class);
     }
 
     /**
