@@ -31,7 +31,7 @@ class Cita extends Model
         return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 
-    public function cubiculo()
+       public function cubiculo()
     {
         return $this->belongsTo(Cubiculo::class, 'cubiculo_id');
     }

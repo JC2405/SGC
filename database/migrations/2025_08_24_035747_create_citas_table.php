@@ -17,6 +17,10 @@ return new class extends Migration
             $table->foreignId('doctor_id')->constrained('doctores')->onDelete('cascade');
             $table->dateTime('fecha_hora');
             $table->enum('estado', ['pendiente', 'confirmada', 'cancelada', 'atendida'])->default('pendiente');
+            $table->foreignId('cubiculo_id')
+            ->constrained('cubiculos')
+            ->onUpdate('cascade')
+            ->onDelete('restrict');
             $table->timestamps();
         });
     }

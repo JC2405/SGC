@@ -11,14 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('usuarios', function (Blueprint $table) {
+      Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->string('apellido');
-            $table->string('email')->unique();
-            $table->string('telefono')->nullable();
+            $table->string('nombre', 255);
+            $table->string('apellido', 255);
+            $table->string('documento_identidad', 255)->unique();
+            $table->string('email', 255)->unique();
+            $table->string('telefono', 255)->nullable();
             $table->date('fecha_nacimiento')->nullable();
             $table->timestamps();
+
+            // Clave foránea hacia eps
+            $table->foreignId('eps_id')
+                  ->constrained('eps')
+                  ->onUpdate('cascade')
+                  ->onDelete('restrict'); 
         });
     }
 

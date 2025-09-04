@@ -25,4 +25,9 @@ class Doctor extends Model
     {
         return $this->hasMany(Cita::class, 'doctor_id');
     }
+    
+      public function cubiculo()
+    {
+        return $this->belongsTo(Cubiculo::class, 'cubiculo_id');
+    }
 }

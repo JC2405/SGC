@@ -4,19 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Especialidad extends Model
+class Eps extends Model
 {
-    protected $table = 'especialidades';
+    protected $table = 'eps';
 
     protected $fillable = [
-        'nombre', 
-        'descripcion'
+        'nombre',
+        'codigo',
+        'nit',
+        'telefono',
+        'email',
+        'direccion',
+        'estado',
     ];
 
-    public $timestamps = true;
-
-    public function doctores()
+    // scope: eps activas
+    public function scopeActivas($query)
     {
-        return $this->hasMany(Doctor::class, 'especialidad_id');
+        return $query->where('estado', 'activa');
+    }
+
+    // relación: una EPS tiene muchos usuarios
+    public function usuarios()
+    {
+        return $this->hasMany(Usuario::class, 'eps_id');
     }
 }

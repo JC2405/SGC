@@ -4,19 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class especialidades extends Model
+class Especialidad extends Model
 {
     protected $table = 'especialidades';
 
-    protected $fillable = [
-        'nombre', 
-        'descripcion'
-    ];
+    protected $fillable = ['nombre', 'descripcion'];
 
     public $timestamps = true;
 
     public function doctores()
     {
-        return $this->hasMany(\App\Models\doctores::class, 'especialidad_id');
+        return $this->hasMany(Doctor::class, 'especialidad_id');
     }
 }
