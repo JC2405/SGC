@@ -24,6 +24,8 @@ class EspecialidadesController extends Controller
         }
     }
 
+
+
     public function store(Request $request)
     {
         try {

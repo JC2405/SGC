@@ -3,33 +3,38 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 //importar controladores
-use App\Http\Controllers\UsuariosController;
+
 use App\Http\Controllers\EspecialidadesController;  
-use App\Http\Controllers\DoctoresController;
+use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\CitasController;
 use App\Http\Controllers\EpsController;
 use App\Http\Controllers\CubiculosController; 
 use App\Models\Cubiculo;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\UsuariosController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+
     
-     
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::get("/listarUsuarios", [UsuariosController::class, 'index']);
 
 Route::group(['middleware' => 'auth:api'], function () {
-        //USUARIOS
-    Route::get("listarUsuarios", [UsuariosController::class, 'index']);
+
+ //USUARIOS
+    
     Route::post("crearUsuario", [UsuariosController::class, 'store']);
     Route::get("usuario/{id}", [UsuariosController::class, 'show']); 
     Route::put("actualizarUsuario/{id}", [UsuariosController::class, 'update']);
     Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);  
     
     //ESPECIALIDADES
+
     Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
     Route::post("crearEspecialidad", [EspecialidadesController::class, 'store']);
     Route::get("especialidad/{id}", [EspecialidadesController::class, 'show']);
@@ -37,12 +42,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete("eliminarEspecialidad/{id}", [EspecialidadesController::class, 'destroy']);
     
     //DOCTORES
-    Route::get("listarDoctores", [DoctoresController::class, 'index']); 
-    Route::post("crearDoctor", [DoctoresController::class, 'store']);
-    Route::get("doctor/{id}", [DoctoresController::class, 'show']);
-    Route::put("actualizarDoctor/{id}", [DoctoresController::class, 'update']);
-    Route::delete("eliminarDoctor/{id}", [DoctoresController::class, 'destroy']);
-    Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctoresController::class, 'porEspecialidad']);
+    
+    Route::get("listarDoctores", [DoctorController::class, 'index']); 
+    Route::post("crearDoctor", [DoctorController::class, 'store']);
+    Route::get("doctor/{id}", [DoctorController::class, 'show']);
+    Route::put("actualizarDoctor/{id}", [DoctorController::class, 'update']);
+    Route::delete("eliminarDoctor/{id}", [DoctorController::class, 'destroy']);
+    Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctorController::class, 'porEspecialidad']);
     
     //CITAS
     Route::get("listarCitas", [CitasController::class, 'index']);
@@ -75,4 +81,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
+
+
+    //CUBICULOS
+
+    Route::get("listarCubiculos", [CubiculosController::class, 'index']);
+    Route::post("crearCubiculo", [CubiculosController::class, 'store']);
+    Route::get("cubiculo/{id}", [CubiculosController::class, 'show']);
+    Route::put("actualizarCubiculo/{id}", [CubiculosController::class, 'update']);
+    Route::delete("eliminarCubiculo/{id}", [CubiculosController::class, 'destroy']);
+
 });
