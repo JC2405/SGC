@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Usuario; // Corregido nombre del modelo
+
 
 class UsuariosController extends Controller
-{
+{   
     public function index()
     {
-        $usuarios = Usuario::with('eps')->get();
-        return response()->json($usuarios);
+        $usuario=Usuario::all();
+        return response()->json($usuario);
     }
 
     public function store(Request $request)

@@ -8,7 +8,7 @@ use App\Http\Controllers\EspecialidadesController;
 use App\Http\Controllers\DoctoresController;
 use App\Http\Controllers\CitasController;
 use App\Http\Controllers\EpsController;
-use App\Http\Controllers\CubiculosController; // Agregada importación faltante
+use App\Http\Controllers\CubiculosController; 
 use App\Models\Cubiculo;
 use App\Http\Controllers\AuthController;
 
@@ -16,18 +16,17 @@ use App\Http\Controllers\AuthController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-
-  Route::get("listarUsuarios", [UsuariosController::class, 'index']);
-
+    
+     
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::group(['middleware' => 'auth:api'], function () {
         //USUARIOS
-  
+    Route::get("listarUsuarios", [UsuariosController::class, 'index']);
     Route::post("crearUsuario", [UsuariosController::class, 'store']);
     Route::get("usuario/{id}", [UsuariosController::class, 'show']); 
-    Route::put("act ualizarUsuario/{id}", [UsuariosController::class, 'update']);
+    Route::put("actualizarUsuario/{id}", [UsuariosController::class, 'update']);
     Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);  
     
     //ESPECIALIDADES
@@ -38,7 +37,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete("eliminarEspecialidad/{id}", [EspecialidadesController::class, 'destroy']);
     
     //DOCTORES
-    Route::get("listarDoctores", [DoctoresController::class, 'index']);
+    Route::get("listarDoctores", [DoctoresController::class, 'index']); 
     Route::post("crearDoctor", [DoctoresController::class, 'store']);
     Route::get("doctor/{id}", [DoctoresController::class, 'show']);
     Route::put("actualizarDoctor/{id}", [DoctoresController::class, 'update']);
@@ -72,22 +71,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     
     // Rutas extra
     Route::get('cubiculos/disponibles/list', [CubiculosController::class, 'disponibles']);
-    Route::get('cubiculos/tipo/{tipo}',      [CubiculosController::class, 'porTipo']);
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-    //USERS
+    Route::get('cubiculos/tipo/{tipo}',      [CubiculosController::class, 'porTipo']);    //USERS
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
