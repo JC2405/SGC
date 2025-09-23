@@ -6,21 +6,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function crearUsuario(Request $request)
     {
-        $user = User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password' => Hash::make($request->password)
+        $validated = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:4',
+            'rol' => 'required|string'
         ]);
 
-          $token = Auth::guard('api')->login($user);
+        if ($validated->fails()) {
+            return response()->json(['errors' => $validated->errors()]);
+        }
 
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'rol' => $request->rol
+        ]);
 
-        return response()->json(['user' => $user, 'token' => $token]);
+        return response()->json(['success' => true, 'message' => 'Usuario agregado correctamente', 'user' => $user]);
     }
 
     public function login(Request $request)

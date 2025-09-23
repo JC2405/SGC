@@ -14,14 +14,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsuariosController;
 
 
-Route::post('register', [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'crearUsuario']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get("/listarUsuarios", [UsuariosController::class, 'index']);
 
 Route::group(['middleware' => 'auth:api'], function () {
 
     // USUARIOS
-    Route::post("crearUsuario", [UsuariosController::class, 'store'])->middleware('role:admin,paciente');
+    Route::post("crearUsuario", [UsuariosController::class, 'store'])->middleware('role:admin,paciente,medico');
     Route::get("usuario/{id}", [UsuariosController::class, 'show']); 
     Route::put("actualizarUsuario/{id}", [UsuariosController::class, 'update']);
     Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);  
