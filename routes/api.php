@@ -21,13 +21,13 @@ Route::get("/listarUsuarios", [UsuariosController::class, 'index']);
 Route::group(['middleware' => 'auth:api'], function () {
 
     // USUARIOS
-    Route::post("crearUsuario", [UsuariosController::class, 'store'])->middleware('role:admin,paciente,medico');
+    Route::post("crearUsuario", [UsuariosController::class, 'store'])->middleware('rol:admin,paciente,medico');
     Route::get("usuario/{id}", [UsuariosController::class, 'show']); 
     Route::put("actualizarUsuario/{id}", [UsuariosController::class, 'update']);
     Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);  
     
     // ESPECIALIDADES
-    Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
+    Route::get("listarEspecialidades", [EspecialidadesController::class, 'index'])->middleware('rol:paciente,admin');
     Route::post("crearEspecialidad", [EspecialidadesController::class, 'store']);
     Route::get("especialidad/{id}", [EspecialidadesController::class, 'show']);
     Route::put("actualizarEspecialidad/{id}", [EspecialidadesController::class, 'update']);
