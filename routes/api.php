@@ -27,57 +27,57 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);  
     
     // ESPECIALIDADES
-    Route::get("listarEspecialidades", [EspecialidadesController::class, 'index'])->middleware('rol:paciente,admin');
-    Route::post("crearEspecialidad", [EspecialidadesController::class, 'store']);
-    Route::get("especialidad/{id}", [EspecialidadesController::class, 'show']);
-    Route::put("actualizarEspecialidad/{id}", [EspecialidadesController::class, 'update']);
-    Route::delete("eliminarEspecialidad/{id}", [EspecialidadesController::class, 'destroy']);
+    Route::get("listarEspecialidades", [EspecialidadesController::class, 'index'])->middleware('rol:paciente,medico,admin');
+    Route::post("crearEspecialidad", [EspecialidadesController::class, 'store'])->middleware('rol:medico,admin');
+    Route::get("especialidad/{id}", [EspecialidadesController::class, 'show'])->middleware('rol:medico,admin');
+    Route::put("actualizarEspecialidad/{id}", [EspecialidadesController::class, 'update'])->middleware('rol:admin');
+    Route::delete("eliminarEspecialidad/{id}", [EspecialidadesController::class, 'destroy'])->middleware('rol:admin');
     
     // DOCTORES
-    Route::get("listarDoctores", [DoctorController::class, 'index']); 
-    Route::post("crearDoctor", [DoctorController::class, 'store']);
-    Route::get("doctor/{id}", [DoctorController::class, 'show']);
-    Route::put("actualizarDoctor/{id}", [DoctorController::class, 'update']);
-    Route::delete("eliminarDoctor/{id}", [DoctorController::class, 'destroy']);
-    Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctorController::class, 'porEspecialidad']);
+    Route::get("listarDoctores", [DoctorController::class, 'index'])->middleware('rol:admin'); 
+    Route::post("crearDoctor", [DoctorController::class, 'store'])->middleware('rol:admin');
+    Route::get("doctor/{id}", [DoctorController::class, 'show'])->middleware('rol:paciente');
+    Route::put("actualizarDoctor/{id}", [DoctorController::class, 'update'])->middleware('rol:admin,medico');
+    Route::delete("eliminarDoctor/{id}", [DoctorController::class, 'destroy'])->middleware('rol:admin');
+    Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctorController::class, 'porEspecialidad'])->middleware('rol:admin');
     
     // CITAS
-    Route::get("listarCitas", [CitasController::class, 'index']);
-    Route::post("crearCita", [CitasController::class, 'store']);
-    Route::get("cita/{id}", [CitasController::class, 'show']);
-    Route::put("actualizarCita/{id}", [CitasController::class, 'update']);
-    Route::delete("eliminarCita/{id}", [CitasController::class, 'destroy']);
-    Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente']);
-    Route::get("citasPorDoctor/{doctor_id}", [CitasController::class, 'porDoctor']);
-    Route::patch("cambiarEstadoCita/{id}", [CitasController::class, 'cambiarEstado']);
+    Route::get("listarCitas", [CitasController::class, 'index'])->middleware('rol:admin');
+    Route::post("crearCita", [CitasController::class, 'store'])->middleware('rol:paciente,admin');
+    Route::get("cita/{id}", [CitasController::class, 'show'])->middleware('rol:paciente');
+    Route::put("actualizarCita/{id}", [CitasController::class, 'update'])->middleware('rol:admin');
+    Route::delete("eliminarCita/{id}", [CitasController::class, 'destroy'])->middleware('rol:admin');
+    Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente'])->middleware('rol:admin,paciente');
+    Route::get("citasPorDoctor/{doctor_id}", [CitasController::class, 'porDoctor'])->middleware('rol:admin,medico');
+    Route::patch("cambiarEstadoCita/{id}", [CitasController::class, 'cambiarEstado'])->middleware('rol:admin,medico');
     
     // EPS
-    Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy']);
-    Route::get('eps/activas/list', [EpsController::class, 'activas']);
-    Route::get('eps/inactivas/list', [EpsController::class, 'inactivas']);
-    Route::patch('eps/{id}/cambiar-estado', [EpsController::class, 'cambiarEstado']);
-    
+    Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy'])->middleware('rol:admin');
+    Route::get('eps/activas/list', [EpsController::class, 'activas'])->middleware('rol:admin');
+    Route::get('eps/inactivas/list', [EpsController::class, 'inactivas'])->middleware('rol:admin');
+    Route::patch('eps/{id}/cambiar-estado', [EpsController::class, 'cambiarEstado'])->middleware('rol:admin');
+
     // Rutas para Cubículos (separadas)
-    Route::get   ('cubiculos',            [CubiculosController::class, 'index']);
-    Route::post  ('cubiculos',            [CubiculosController::class, 'store']);
-    Route::get   ('cubiculos/{id}',       [CubiculosController::class, 'show']);
-    Route::put   ('cubiculos/{id}',       [CubiculosController::class, 'update']);
-    Route::patch ('cubiculos/{id}',       [CubiculosController::class, 'update']); // opcional
-    Route::delete('cubiculos/{id}',       [CubiculosController::class, 'destroy']);
+    Route::get   ('cubiculos',            [CubiculosController::class, 'index'])->middleware('rol:admin');
+    Route::post  ('cubiculos',            [CubiculosController::class, 'store'])->middleware('rol:admin,medico');
+    Route::get   ('cubiculos/{id}',       [CubiculosController::class, 'show'])->middleware('rol:admin,medico');
+    Route::put   ('cubiculos/{id}',       [CubiculosController::class, 'update'])->middleware('rol:admin');
+    Route::patch ('cubiculos/{id}',       [CubiculosController::class, 'update'])->middleware('rol:admin');
+    Route::delete('cubiculos/{id}',       [CubiculosController::class, 'destroy'])->middleware('rol:admin');
     
     // Rutas extra
-    Route::get('cubiculos/disponibles/list', [CubiculosController::class, 'disponibles']);
-    Route::get('cubiculos/tipo/{tipo}',      [CubiculosController::class, 'porTipo']);    
+    Route::get('cubiculos/disponibles/list', [CubiculosController::class, 'disponibles'])->middleware('rol:admin');
+    Route::get('cubiculos/tipo/{tipo}',      [CubiculosController::class, 'porTipo'])->middleware('rol:admin');    
 
     // AUTH extra
-    Route::get('me', [AuthController::class, 'me']);
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me'])->middleware('rol:admin,paciente,medico');
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('rol:admin,paciente,medico');
     Route::post('refresh', [AuthController::class, 'refresh']);
 
     // CUBICULOS
-    Route::get("listarCubiculos", [CubiculosController::class, 'index']);
-    Route::post("crearCubiculo", [CubiculosController::class, 'store']);
-    Route::get("cubiculo/{id}", [CubiculosController::class, 'show']);
-    Route::put("actualizarCubiculo/{id}", [CubiculosController::class, 'update']);
-    Route::delete("eliminarCubiculo/{id}", [CubiculosController::class, 'destroy']);
+    Route::get("listarCubiculos", [CubiculosController::class, 'index'])->middleware('rol:admin');
+    Route::post("crearCubiculo", [CubiculosController::class, 'store'])->middleware('rol:admin');
+    Route::get("cubiculo/{id}", [CubiculosController::class, 'show'])->middleware('rol:admin');
+    Route::put("actualizarCubiculo/{id}", [CubiculosController::class, 'update'])->middleware('rol:admin');
+    Route::delete("eliminarCubiculo/{id}", [CubiculosController::class, 'destroy'])->middleware('rol:admin');
 });
