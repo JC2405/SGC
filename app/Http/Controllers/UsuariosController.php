@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsuariosController extends Controller
 {   
@@ -21,10 +23,11 @@ class UsuariosController extends Controller
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'email' => 'required|email|unique:usuarios,email',
+            'password' => 'required|string|min:4',
             'telefono' => 'required|string|max:20',
             'fecha_nacimiento' => 'required|date',
             'eps_id' => 'nullable|exists:eps,id',
-            'numero_afiliacion' => 'nullable|string|max:50'
+         
         ]);
 
         if ($validator->fails()) {
@@ -59,7 +62,7 @@ class UsuariosController extends Controller
             'telefono' => 'string|max:20',
             'fecha_nacimiento' => 'date',
             'eps_id' => 'nullable|exists:eps,id',
-            'numero_afiliacion' => 'nullable|string|max:50'
+          
         ]);
 
         if ($validator->fails()) {
@@ -81,4 +84,82 @@ class UsuariosController extends Controller
         $usuario->delete();
         return response()->json(['message' => 'Usuario eliminado']);
     }
+public function crearUsuarioPaciente(Request $request)
+{
+    try {
+        $validated = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'email' => 'required|email|unique:usuarios,email',
+            'password' => 'required|string|min:4',
+            'telefono' => 'required|string|max:20',
+            'fecha_nacimiento' => 'required|date',
+            'documento_identidad' => 'required|string|max:50|unique:usuarios,documento_identidad',
+            'eps_id' => 'nullable|exists:eps,id'
+        ]);
+
+        if ($validated->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Errores de validación",
+                "errors" => $validated->errors()
+            ], 422);
+        }
+
+        $usuario = Usuario::create([
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'telefono' => $request->telefono,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'documento_identidad' => $request->documento_identidad,
+            'eps_id' => $request->eps_id
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Usuario agregado correctamente",
+            "usuario" => $usuario
+        ], 201);
+
+    } catch (\Illuminate\Database\QueryException $e) {
+        return response()->json([
+            "success" => false,
+            "message" => "Error en la base de datos",
+            "error" => $e->getMessage()
+        ], 500);
+    } catch (\Exception $e) {
+        return response()->json([
+            "success" => false,
+            "message" => "Error inesperado",
+            "error" => $e->getMessage()
+        ], 500);
+        }
+    }
+
+      public function login(Request $request){
+            $validated = Validator::make($request->all(),[
+                'email' => 'required|email',
+                'password' => 'required|string|min:4'
+            ]);
+
+            if($validated->fails()){
+                return response()->json(['errors' => $validated->errors()]);
+            }
+
+            $credenciales = $request->only('email','password');
+            if(!$token = JWTAuth::attempt($credenciales)){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Credenciales Invalidas'
+                ]);
+            }
+
+            return response()->json(['Success' => true, 'message' => 'Bienvenido', 'Token' => $token],200);
+
+
+        }
+
+
 }

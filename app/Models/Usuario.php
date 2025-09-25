@@ -2,25 +2,45 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Notifications\Notifiable;
 
-class Usuario extends Model
+class Usuario extends Authenticatable implements JWTSubject
 {
-    protected $table = 'usuarios';
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'nombre',
         'apellido',
+        'documento_identidad',
         'email', 
+        'password',
         'telefono',
         'fecha_nacimiento',
         'eps_id',
-        'numero_afiliacion'
+
     ];
 
     protected $casts = [
         'fecha_nacimiento' => 'date'
     ];
+
+      protected $hidden = [
+        'password',
+    ];
+
+    // Métodos requeridos por JWT
+    public function getJWTIdentifier()
+    {
+        return $this->getKey(); // devuelve el id del usuario
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 
     public function citas()
     {
