@@ -42,7 +42,7 @@ Route::middleware(['jwt.multiguard'])->group(function () {
 
         // Usuarios
         Route::post('register', [AuthController::class, 'crearUsuario']);
-        Route::post("crearUsuario", [UsuariosController::class, 'store']);
+       Route::post("crearUsuario", [UsuariosController::class, 'store']);
 
         Route::get("listarUsuarios", [UsuariosController::class, 'index']);
         Route::put("actualizarUsuario/{id}", [UsuariosController::class, 'update']);
