@@ -12,12 +12,20 @@ class Doctor extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
+     protected $table = 'doctores';
+
+     public $timestamps = false;
+
     protected $fillable = [
         'nombre',
         'apellido', 
         'email',
         'telefono',
-        'especialidad_id'
+        'password',
+        'especialidad_id',
+        'cubiculo_id',
+        'rol_id',
+        
     ];
 
       protected $hidden = [
@@ -51,7 +59,11 @@ class Doctor extends Authenticatable implements JWTSubject
     }
     public function horarios()
     {
-        return $this->hasMany(Horario::class);
+        return $this->hasMany(horarios::class);
     }
-    
+
+        public function rol()
+        {
+            return $this->belongsTo(Roles::class, 'rol_id');
+        }
 }

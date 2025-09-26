@@ -8,17 +8,25 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next,...$roles): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        $user = $request->user();
-        if (!in_array($request->user()->rol, $roles)) {
-            abort(403, 'Acesso no autorizado.');
+        $user = $request->jwt_user;
+
+        if (!$user) {
+            return response()->json(['Error' => 'Token inválido'], 401);
         }
+
+        // Asegura que el modelo tenga la relación 'rol'
+        if (method_exists($user, 'rol')) {
+            $user->load('rol');
+        }
+
+        $userRole = $user->rol->rol ?? null;
+
+        if (!$userRole || !in_array($userRole, $roles, true)) {
+            return response()->json(['Error' => 'Error no tienes el permiso necesario'], 403);
+        }
+
         return $next($request);
     }
 }

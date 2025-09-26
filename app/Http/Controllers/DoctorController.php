@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Doctor; // Corregido nombre del modelo
+use Illuminate\Container\Attributes\Auth;
 use PhpParser\Comment\Doc;
+use Illuminate\Support\Facades\Hash;
 
 class DoctorController extends Controller
 {
@@ -89,32 +91,40 @@ class DoctorController extends Controller
         return response()->json($doctores);
     }
 
-      public function crearUsuarioPaciente(Request $request)
-    {
-        $validated = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'email' => 'required|email|unique:doctores,email',
-            'password' => 'required|string|min:4',
-            'telefono' => 'nullable|string|max:20',
-            'especialidad_id' => 'required|exists:especialidades,id',
-            'cubiculo_id' => 'nullable|exists:cubiculos,id'
-        ]);
 
-        if ($validated->fails()) {
-            return response()->json(['errors' => $validated->errors()]);
-        }
+   public function crearUsuarioDoctor(Request $request)
+{
+    $validated = Validator::make($request->all(), [
+        'nombre' => 'required|string|max:255',
+        'apellido' => 'required|string|max:255',
+        'email' => 'required|email|unique:doctores,email',
+        'password' => 'required|string|min:4',
+        'telefono' => 'nullable|string|max:20',
+        'especialidad_id' => 'required|exists:especialidades,id',
+        'cubiculo_id' => 'nullable|exists:cubiculos,id',
+        'rol_id' => 'required|exists:roles,id',
+    ]);
 
-        $doctor = Doctor::create([
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'email' => $request->email,
-            'password' => Doctor::make($request->password),
-            'telefono' => $request->telefono,
-            'especialidad_id' => $request->especialidad_id,
-            'cubiculo_id' => $request->cubiculo_id
-        ]);
-
-        return response()->json(['success' => true, 'message' => 'Usuario agregado correctamente', 'Doctor' => $doctor]);
+    if ($validated->fails()) {
+        return response()->json(['errors' => $validated->errors()]);
     }
+
+    $doctor = Doctor::create([
+        'nombre'          => $request->nombre,
+        'apellido'        => $request->apellido,
+        'email'           => $request->email,
+        'password'        => Hash::make($request->password), // 🔑 aquí el cambio
+        'telefono'        => $request->telefono,
+        'especialidad_id' => $request->especialidad_id,
+        'cubiculo_id'     => $request->cubiculo_id,
+        'rol_id'          => $request->rol_id,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Usuario agregado correctamente',
+        'Doctor'  => $doctor
+    ]);
+}
+
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\MultiGuardJWTMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
@@ -16,8 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         //
         $middleware->alias([
-            'jwt.auth'=>Authenticate::class,
-            'rol'=>RoleMiddleware::class,
+            'jwt.multiguard' => \App\Http\Middleware\MultiGuardJWTMiddleware::class,
+            'rol'            => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

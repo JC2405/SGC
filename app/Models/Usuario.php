@@ -20,6 +20,7 @@ class Usuario extends Authenticatable implements JWTSubject
         'telefono',
         'fecha_nacimiento',
         'eps_id',
+        'rol_id',
 
     ];
 
@@ -50,5 +51,10 @@ class Usuario extends Authenticatable implements JWTSubject
     public function eps()
     {
         return $this->belongsTo(Eps::class);
+    }
+
+    public function rol()
+    {
+        return $this->belongsTo(Roles::class, 'rol_id');
     }
 }

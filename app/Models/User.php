@@ -14,14 +14,20 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name', 
         'email',
-        'rol',
-         'password',
+        'password',
+        'rol_id',
+        
     ];
 
     protected $hidden = [
         'password',
     ];
 
+
+    public function rol()
+    {
+        return $this->belongsTo(Roles::class, 'rol_id');
+    }
     // Métodos requeridos por JWT
     public function getJWTIdentifier()
     {

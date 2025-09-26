@@ -84,18 +84,20 @@ class UsuariosController extends Controller
         $usuario->delete();
         return response()->json(['message' => 'Usuario eliminado']);
     }
+    
 public function crearUsuarioPaciente(Request $request)
 {
     try {
         $validated = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'email' => 'required|email|unique:usuarios,email',
-            'password' => 'required|string|min:4',
-            'telefono' => 'required|string|max:20',
-            'fecha_nacimiento' => 'required|date',
-            'documento_identidad' => 'required|string|max:50|unique:usuarios,documento_identidad',
-            'eps_id' => 'nullable|exists:eps,id'
+        'nombre' => 'required|string|max:255',
+        'apellido' => 'required|string|max:255',
+        'documento_identidad' => 'required|string|max:255|unique:usuarios',
+        'email' => 'required|string|email|max:255|unique:usuarios',
+        'password' => 'required|string|min:8',
+        'telefono' => 'nullable|string|max:20',
+        'fecha_nacimiento' => 'required|date',
+        'eps_id' => 'required|exists:eps,id',
+        'rol_id' => 'required|exists:roles,id',
         ]);
 
         if ($validated->fails()) {
@@ -114,7 +116,8 @@ public function crearUsuarioPaciente(Request $request)
             'telefono' => $request->telefono,
             'fecha_nacimiento' => $request->fecha_nacimiento,
             'documento_identidad' => $request->documento_identidad,
-            'eps_id' => $request->eps_id
+            'eps_id' => $request->eps_id,
+            'rol_id' => $request->rol_id,
         ]);
 
         return response()->json([

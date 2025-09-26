@@ -17,4 +17,10 @@ class Roles extends Model
     protected $fillable = [
         'role',
     ];
+
+
+  //  public function getRolAttribute($value)
+  //  {
+  //      return $this->role;
+  //  }
 }
