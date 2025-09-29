@@ -20,7 +20,7 @@ use App\Http\Controllers\UsuariosController;
 |--------------------------------------------------------------------------
 */
 Route::post('login', [AuthController::class, 'login']);
-   Route::post("crearUsuarioPaciente", [UsuariosController::class, 'crearUsuarioPaciente']);
+Route::post("crearUsuarioPaciente", [UsuariosController::class, 'crearUsuarioPaciente']);
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +42,9 @@ Route::middleware(['jwt.multiguard'])->group(function () {
 
         // Usuarios
         Route::post('register', [AuthController::class, 'crearUsuario']);
+       Route::get('listarUsuariosAuth', [AuthController::class, 'listarUsuarios']);
+       Route::put('actualizarUsuarioAuth/{id}', [AuthController::class, 'actualizarUsuario']);
+       Route::delete('eliminarUsuarioAuth/{id}', [AuthController::class, 'eliminarUsuario']);
        Route::post("crearUsuario", [UsuariosController::class, 'store']);
 
         Route::get("listarUsuarios", [UsuariosController::class, 'index']);
@@ -49,7 +52,7 @@ Route::middleware(['jwt.multiguard'])->group(function () {
         Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);  
 
         // Especialidades
-        Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
+       
         Route::post("crearEspecialidad", [EspecialidadesController::class, 'store']);
         Route::get("especialidad/{id}", [EspecialidadesController::class, 'show']);
         Route::put("actualizarEspecialidad/{id}", [EspecialidadesController::class, 'update']);
@@ -64,7 +67,7 @@ Route::middleware(['jwt.multiguard'])->group(function () {
         Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctorController::class, 'porEspecialidad']);
         
         // Citas
-        Route::get("listarCitas", [CitasController::class, 'index']);
+      
         Route::put("actualizarCita/{id}", [CitasController::class, 'update']);
         Route::delete("eliminarCita/{id}", [CitasController::class, 'destroy']);
         Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente']);
@@ -112,7 +115,7 @@ Route::middleware(['jwt.multiguard'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['rol:paciente'])->group(function () {
-        Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
+      
         Route::get("doctor/{id}", [DoctorController::class, 'show']);
         Route::get("cita/{id}", [CitasController::class, 'show']);
         Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente']);
@@ -124,9 +127,11 @@ Route::middleware(['jwt.multiguard'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['rol:admin,doctor,paciente'])->group(function () {
-          Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy']);
-         Route::get("listarDoctores", [DoctorController::class, 'index']);
-        Route::get("usuario/{id}", [UsuariosController::class, 'show']); 
+        Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
+        Route::get("listarCitas", [CitasController::class, 'index']);
+        Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy']);
+        Route::get("listarDoctores", [DoctorController::class, 'index']);
+        Route::get("usuario/{id}", [UsuariosController::class, 'show']);
         Route::post("crearCita", [CitasController::class, 'store']);
         Route::get("me", [AuthController::class, 'me']);
         Route::post("logout", [AuthController::class, 'logout']);

@@ -1,26 +1,28 @@
 <?php
 
-namespace App\Models;
+ namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+ use Illuminate\Database\Eloquent\Factories\HasFactory;
+ use Illuminate\Database\Eloquent\Model;
 
-class Roles extends Model
-{
-    use HasFactory;
+ class Roles extends Model
+ {
+     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *\
-     * @var array
-     */
-    protected $fillable = [
-        'role',
-    ];
+     /**
+      * The attributes that are mass assignable.
+      *\
+      * @var array
+      */
+     protected $fillable = [
+         'role',
+     ];
 
-
-  //  public function getRolAttribute($value)
-  //  {
-  //      return $this->role;
-  //  }
-}
+     /**
+      * Get the role name
+      */
+     public function getRolAttribute()
+     {
+         return $this->role;
+     }
+ }

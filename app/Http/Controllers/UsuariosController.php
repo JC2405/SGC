@@ -96,7 +96,7 @@ public function crearUsuarioPaciente(Request $request)
         'password' => 'required|string|min:8',
         'telefono' => 'nullable|string|max:20',
         'fecha_nacimiento' => 'required|date',
-        'eps_id' => 'required|exists:eps,id',
+        'eps_id' => 'nullable|exists:eps,id',
         'rol_id' => 'required|exists:roles,id',
         ]);
 
@@ -166,3 +166,4 @@ public function crearUsuarioPaciente(Request $request)
 
 
 }
+

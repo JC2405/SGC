@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CORSMiddleware;
 use App\Http\Middleware\MultiGuardJWTMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Auth\Middleware\Authenticate;
