@@ -18,40 +18,56 @@ class HorarioController extends Controller
 
     public function store(Request $request)
     {
-      //  $doctor = auth('api_doctores')->user() ?? $request->jwt_user;
-//
-      //  // Ensure we have a valid doctor user
-      //  if (!$doctor || !isset($doctor->id)) {
-      //      return response()->json(['error' => 'Usuario no válido'], 401);
-      //  }
+        // Para admin: usar el doctor_id que viene en la solicitud
+        // Para doctor: usar el usuario autenticado
+        $user = $request->jwt_user;
 
-              $validated = Validator::make($request->all(), [
-            'dia'        => 'required|string|max:20', // 👈 agregar validación del día
-            'hora_inicio'=> 'required|date_format:H:i',
-            'hora_fin'   => 'required|date_format:H:i',
-            'estado'     => 'required|string|in:activo,inactivo',
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
+
+        $validated = Validator::make($request->all(), [
+            'doctor_id'   => 'required|exists:doctores,id',
+            'dia'         => 'required|string|max:20',
+            'hora_inicio' => 'required|date_format:H:i',
+            'hora_fin'    => 'required|date_format:H:i|after:hora_inicio',
+            'estado'      => 'required|string|in:activo,inactivo',
         ]);
-        
+
         if ($validated->fails()) {
             return response()->json(['errors' => $validated->errors()], 422);
         }
-        
+
+        // Verificar que el horario no se solape con horarios existentes del mismo doctor
+        $horarioExistente = Horarios::where('doctor_id', $request->doctor_id)
+            ->where('dia', $request->dia)
+            ->where(function($query) use ($request) {
+                $query->where(function($q) use ($request) {
+                    $q->where('hora_inicio', '<', $request->hora_fin)
+                      ->where('hora_fin', '>', $request->hora_inicio);
+                });
+            })
+            ->first();
+
+        if ($horarioExistente) {
+            return response()->json([
+                'error' => 'Ya existe un horario en ese rango de tiempo para este doctor'
+            ], 409);
+        }
+
         $crearHorario = Horarios::create([
-            'doctor_id'   => $request->doctor_id, // Asegúrate de que el ID del doctor venga en la solicitud
+            'doctor_id'   => $request->doctor_id,
             'dia'         => $request->dia,
             'hora_inicio' => $request->hora_inicio,
             'hora_fin'    => $request->hora_fin,
             'estado'      => $request->estado,
         ]);
-        
 
-        return response()->json(
-            [
-                'message' => 'horario creado correctamente',
-                'success' => true,
-                'horario' => $crearHorario
-            ]
-        );
+        return response()->json([
+            'message' => 'Horario creado correctamente',
+            'success' => true,
+            'horario' => $crearHorario->load('doctor')
+        ]);
     }
 
     public function update(Request $request, $id)

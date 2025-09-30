@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use App\Models\Especialidad; // Corregido nombre del modelo
 
 class EspecialidadesController extends Controller
@@ -11,12 +12,15 @@ class EspecialidadesController extends Controller
     public function index()
     {
         try {
+            Log::info('EspecialidadesController@index: Iniciando consulta de especialidades');
             $especialidades = Especialidad::all();
+            Log::info('EspecialidadesController@index: Especialidades encontradas', ['count' => $especialidades->count(), 'data' => $especialidades->toArray()]);
             return response()->json([
                 'success' => true,
                 'data' => $especialidades
             ], 200);
         } catch (\Exception $e) {
+            Log::error('EspecialidadesController@index: Error', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener especialidades: ' . $e->getMessage()

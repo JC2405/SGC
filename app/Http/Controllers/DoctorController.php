@@ -94,37 +94,54 @@ class DoctorController extends Controller
 
    public function crearUsuarioDoctor(Request $request)
 {
-    $validated = Validator::make($request->all(), [
-        'nombre' => 'required|string|max:255',
-        'apellido' => 'required|string|max:255',
-        'email' => 'required|email|unique:doctores,email',
-        'password' => 'required|string|min:4',
-        'telefono' => 'nullable|string|max:20',
-        'especialidad_id' => 'required|exists:especialidades,id',
-        'cubiculo_id' => 'nullable|exists:cubiculos,id',
-        'rol_id' => 'required|exists:roles,id',
-    ]);
+   $validated = Validator::make($request->all(), [
+       'nombre' => 'required|string|max:255',
+       'apellido' => 'required|string|max:255',
+       'email' => 'required|email|unique:doctores,email',
+       'password' => 'required|string|min:4',
+       'telefono' => 'nullable|string|max:20',
+       'especialidad_id' => 'required|exists:especialidades,id',
+       'cubiculo_id' => 'nullable|exists:cubiculos,id',
+       'rol_id' => 'required|exists:roles,id',
+   ]);
 
-    if ($validated->fails()) {
-        return response()->json(['errors' => $validated->errors()]);
-    }
+   if ($validated->fails()) {
+       return response()->json(['errors' => $validated->errors()]);
+   }
 
-    $doctor = Doctor::create([
-        'nombre'          => $request->nombre,
-        'apellido'        => $request->apellido,
-        'email'           => $request->email,
-        'password'        => Hash::make($request->password), // 🔑 aquí el cambio
-        'telefono'        => $request->telefono,
-        'especialidad_id' => $request->especialidad_id,
-        'cubiculo_id'     => $request->cubiculo_id,
-        'rol_id'          => $request->rol_id,
-    ]);
+   $doctor = Doctor::create([
+       'nombre'          => $request->nombre,
+       'apellido'        => $request->apellido,
+       'email'           => $request->email,
+       'password'        => Hash::make($request->password), // 🔑 aquí el cambio
+       'telefono'        => $request->telefono,
+       'especialidad_id' => $request->especialidad_id,
+       'cubiculo_id'     => $request->cubiculo_id,
+       'rol_id'          => $request->rol_id,
+   ]);
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Usuario agregado correctamente',
-        'Doctor'  => $doctor
-    ]);
+   return response()->json([
+       'success' => true,
+       'message' => 'Usuario agregado correctamente',
+       'Doctor'  => $doctor
+   ]);
 }
+
+   // Método para obtener el perfil del doctor autenticado
+   public function miPerfil(Request $request)
+   {
+       $doctor = auth('api_doctores')->user();
+
+       if (!$doctor) {
+           return response()->json(['error' => 'Usuario no autenticado'], 401);
+       }
+
+       $doctor->load('especialidad', 'cubiculo');
+
+       return response()->json([
+           'success' => true,
+           'doctor' => $doctor
+       ]);
+   }
 
 }

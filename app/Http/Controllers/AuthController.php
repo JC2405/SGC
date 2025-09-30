@@ -6,6 +6,7 @@
  use Illuminate\Support\Facades\Auth;
  use Illuminate\Support\Facades\Log;
  use App\Models\User;
+ use App\Models\Usuario;
  use Illuminate\Support\Facades\Hash;
  use Illuminate\Support\Facades\Validator;
  use Tymon\JWTAuth\Facades\JWTAuth;
@@ -15,28 +16,42 @@ class AuthController extends Controller
     public function crearUsuario(Request $request)
     {
         $validated = Validator::make($request->all(), [
-            'name'     => 'required|string',
-            'email'    => 'required|email',
-            'password' => 'required|string|min:4',
-            'rol'      => 'required|string'
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'documento_identidad' => 'required|string|max:255|unique:usuarios',
+            'email' => 'required|string|email|max:255|unique:usuarios',
+            'password' => 'required|string|min:8',
+            'telefono' => 'nullable|string|max:20',
+            'fecha_nacimiento' => 'required|date',
+            'eps_id' => 'nullable|exists:eps,id',
+            'rol_id' => 'required|exists:roles,id',
         ]);
 
         if ($validated->fails()) {
-            return response()->json(['errors' => $validated->errors()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Errores de validación',
+                'errors' => $validated->errors()
+            ], 422);
         }
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+        $usuario = Usuario::create([
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'documento_identidad' => $request->documento_identidad,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'rol'      => $request->rol
+            'telefono' => $request->telefono,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'eps_id' => $request->eps_id,
+            'rol_id' => $request->rol_id,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Usuario agregado correctamente',
-            'user'    => $user
-        ]);
+            'usuario' => $usuario
+        ], 201);
     }
 
     public function listarUsuarios()
@@ -52,8 +67,16 @@ class AuthController extends Controller
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
 
+        // Si el usuario tiene rol de doctor, también eliminar el registro de doctor
+        if ($usuario->rol_id == 2) { // ID 2 corresponde al rol de doctor según el frontend
+            $doctor = Doctor::where('email', $usuario->email)->first();
+            if ($doctor) {
+                $doctor->delete();
+            }
+        }
+
         $usuario->delete();
-        return response()->json(['message' => 'Usuario eliminado']);
+        return response()->json(['message' => 'Usuario eliminado correctamente']);
     }
 
     public function actualizarUsuario(Request $request, $id)
