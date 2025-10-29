@@ -4,31 +4,32 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Importar controladores
-use App\Http\Controllers\EspecialidadesController;  
+use App\Http\Controllers\EspecialidadesController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\CitasController;
 use App\Http\Controllers\EpsController;
-use App\Http\Controllers\CubiculosController; 
+use App\Http\Controllers\CubiculosController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UsuariosController;
-    Route::get("me", [AuthController::class, 'me']);
-    Route::get("cita/{id}", [CitasController::class, 'show']);
-    Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente']);
-    Route::get("citasPorDoctor/{doctor_id}", [CitasController::class, 'porDoctor']);
 
-    Route::get("listarCitas", [CitasController::class, 'index']);
-    Route::post('crearHorario', [HorarioController::class, 'store']);
-    Route::get('listarHorarios', [HorarioController::class, 'index']);
-    Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy']);
-    Route::post("crearCita", [CitasController::class, 'store']);
-    Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
-    Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente']);
-    Route::get("citasPorDoctor/{doctor_id}", [CitasController::class, 'porDoctor']);
-    Route::patch("cambiarEstadoCita/{id}", [CitasController::class, 'cambiarEstado']);
-    Route::get("me", [AuthController::class, 'me']);
-     
+
+// Usuarios
+        Route::post('register', [AuthController::class, 'crearUsuario']);
+        Route::get('listarUsuariosAuth', [AuthController::class, 'listarUsuarios']);
+        Route::put('actualizarUsuarioAuth/{id}', [AuthController::class, 'actualizarUsuario']);
+        Route::delete('eliminarUsuarioAuth/{id}', [AuthController::class, 'eliminarUsuario']);
+       
+        //Pacientes
+        Route::get("listarUsuarios", [UsuariosController::class, 'index']);
+        Route::put("actualizarUsuario/{id}", [UsuariosController::class, 'update']);
+        Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);          
+
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Rutas públicas
@@ -36,9 +37,10 @@ use App\Http\Controllers\UsuariosController;
 */
 Route::post('login', [AuthController::class, 'login']);
 Route::post("crearUsuarioPaciente", [UsuariosController::class, 'crearUsuarioPaciente']);
-Route::get('eps/activas/list', [EpsController::class, 'activas']);
-
-Route::get("listarDoctores", [DoctorController::class, 'index']);
+Route::post("creacionDeAdmin", [AuthController::class, 'creacionDeAdmins']);
+Route::post("logout", [AuthController::class, 'logout']);
+Route::get("me", [AuthController::class, 'me']);
+       
 
 /*
 |--------------------------------------------------------------------------
@@ -46,58 +48,55 @@ Route::get("listarDoctores", [DoctorController::class, 'index']);
 |--------------------------------------------------------------------------
 */
 Route::middleware(['jwt.multiguard'])->group(function () {
-   
+
+    /*
+    |--------------------------------------------------------------------------
+    | TODOS LOS ROLES (admin, doctor, paciente)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['rol:admin,doctor,paciente'])->group(function () {
+        Route::get("usuario/{id}", [UsuariosController::class, 'show']);
+        Route::post("refresh", [AuthController::class, 'refresh']);
+        Route::get('eps/activas/list', [EpsController::class, 'activas']);
+        Route::get("listarDoctores", [DoctorController::class, 'index']);
+        Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
+        Route::get("horariosDisponibles/{doctor_id}", [HorarioController::class, 'horasDisponibles']);
+    });
+
     /*
     |--------------------------------------------------------------------------
     | ADMIN
     |--------------------------------------------------------------------------
     */
     Route::middleware(['rol:admin'])->group(function () {
-        // Doctores
-        Route::post('CrearUsuarioDoctor', [DoctorController::class, 'crearUsuarioDoctor']);
-
-        // Roles
-     
-        Route::post("crearRol", [RoleController::class, 'store']);
+            
+        // Roles ckeck 
+        Route::post("crearrol", [RoleController::class, 'store']);
         Route::get('indexRol',[RoleController::class,'index']);
+        
+        //Admin
+        Route::post("creacionDeAdmin", [AuthController::class, 'creacionDeAdmins']);
+        Route::put("editarAdmin/{id}",[AuthController::class,'editarAdmin']);
+        Route::delete("eliminarAdmin/{id}",[AuthController::class,'eliminarAdmin']);
 
-        // Usuarios
-        Route::post('register', [AuthController::class, 'crearUsuario']);
-       Route::get('listarUsuariosAuth', [AuthController::class, 'listarUsuarios']);
-       Route::put('actualizarUsuarioAuth/{id}', [AuthController::class, 'actualizarUsuario']);
-       Route::delete('eliminarUsuarioAuth/{id}', [AuthController::class, 'eliminarUsuario']);
-       Route::post("crearUsuario", [UsuariosController::class, 'store']);
-
-        Route::get("listarUsuarios", [UsuariosController::class, 'index']);
-        Route::put("actualizarUsuario/{id}", [UsuariosController::class, 'update']);
-        Route::delete("eliminarUsuario/{id}", [UsuariosController::class, 'destroy']);  
-
-        // Especialidades
-
-        Route::post("crearEspecialidad", [EspecialidadesController::class, 'store']);
+        // Especialidades check 
+        Route::post("crearespecialidad", [EspecialidadesController::class, 'store']);
         Route::get("especialidad/{id}", [EspecialidadesController::class, 'show']);
         Route::put("actualizarEspecialidad/{id}", [EspecialidadesController::class, 'update']);
         Route::delete("eliminarEspecialidad/{id}", [EspecialidadesController::class, 'destroy']);
 
-        // Doctores
-      
-        Route::post("crearDoctor", [DoctorController::class, 'store']);
-        Route::put("actualizarDoctor/{id}", [DoctorController::class, 'update']); 
-        Route::delete("eliminarDoctor/{id}", [DoctorController::class, 'destroy']);
-        Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctorController::class, 'porEspecialidad']);
-        
         // Citas
-      
+        Route::get("listarCitas", [CitasController::class, 'index']);
         Route::put("actualizarCita/{id}", [CitasController::class, 'update']);
         Route::delete("eliminarCita/{id}", [CitasController::class, 'destroy']);
-    
 
-        // EPS
+      
+        // EPS check
+        Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy']);
+        Route::get('eps/inactivas/list', [EpsController::class, 'inactivas']);
+        Route::patch('eps/cambiar-estado/{id}', [EpsController::class, 'cambiarEstado']);
 
-        Route::get('eps/inps/{id}activas/list', [EpsController::class, 'inactivas']);
-        Route::patch('e/cambiar-estado', [EpsController::class, 'cambiarEstado']);
-
-        // Cubículos
+        // Cubículos check
         Route::get("listarCubiculos", [CubiculosController::class, 'index']);
         Route::post("crearCubiculo", [CubiculosController::class, 'store']);
         Route::get("cubiculo/{id}", [CubiculosController::class, 'show']);
@@ -106,10 +105,20 @@ Route::middleware(['jwt.multiguard'])->group(function () {
         Route::get('cubiculos/disponibles/list', [CubiculosController::class, 'disponibles']);
         Route::get('cubiculos/tipo/{tipo}', [CubiculosController::class, 'porTipo']);
 
-        // Horarios
-        Route::post('crearHorario', [HorarioController::class, 'store']);
+        
+        // Horarios check
+        Route::post('crearhorario', [HorarioController::class, 'store']);
+        Route::get('listarHorarios', [HorarioController::class, 'index']);
         Route::put('actualizarHorario/{id}', [HorarioController::class, 'update']);
         Route::delete('eliminarHorario/{id}', [HorarioController::class, 'destroy']);
+       
+        // Doctores check
+        Route::post('CrearUsuarioDoctor', [DoctorController::class, 'crearUsuarioDoctor']);
+         //  Route::post("crearDoctor", [DoctorController::class, 'store']); store sin parametros necesarios
+        Route::put("actualizarDoctor/{id}", [DoctorController::class, 'update']);
+        Route::delete("eliminarDoctor/{id}", [DoctorController::class, 'destroy']);
+        Route::get("doctoresPorEspecialidad/{especialidad_id}", [DoctorController::class, 'porEspecialidad']);
+
     });
 
     /*
@@ -118,15 +127,15 @@ Route::middleware(['jwt.multiguard'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['rol:doctor'])->group(function () {
-        Route::get("especialidad/{id}", [EspecialidadesController::class, 'show']);
+         //Route::get("especialidad/{id}", [EspecialidadesController::class, 'show']);
         Route::get("miPerfil", [DoctorController::class, 'miPerfil']);
-
+        Route::get("cita/{id}", [CitasController::class, 'show']);
+        Route::get("citasPorDoctor/{doctor_id}", [CitasController::class, 'porDoctor']);
         Route::patch("cambiarEstadoCita/{id}", [CitasController::class, 'cambiarEstado']);
         Route::get("cubiculos/{id}", [CubiculosController::class, 'show']);
 
         // Horarios del doctor
         Route::get("misHorarios", [HorarioController::class, 'misHorarios']);
-      
         Route::delete("eliminarHorario/{id}", [HorarioController::class, 'delete']);
     });
 
@@ -136,22 +145,10 @@ Route::middleware(['jwt.multiguard'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['rol:paciente'])->group(function () {
-      
         Route::get("doctor/{id}", [DoctorController::class, 'show']);
-       
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | TODOS LOS ROLES (admin, doctor, paciente)
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware(['rol:admin,doctor,paciente'])->group(function () {
-       
-        Route::get("usuario/{id}", [UsuariosController::class, 'show']);
-      
-      
-        Route::post("logout", [AuthController::class, 'logout']);
-        Route::post("refresh", [AuthController::class, 'refresh']);
+        Route::get("cita/{id}", [CitasController::class, 'show']);
+        Route::get("citasPorPaciente/{paciente_id}", [CitasController::class, 'porPaciente']);
+        Route::post("crearCita", [CitasController::class, 'store']);
+        Route::patch("cambiarEstadoCita/{id}", [CitasController::class, 'cambiarEstado']);
     });
 });

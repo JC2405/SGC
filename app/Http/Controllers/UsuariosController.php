@@ -62,7 +62,7 @@ class UsuariosController extends Controller
             'telefono' => 'string|max:20',
             'fecha_nacimiento' => 'date',
             'eps_id' => 'nullable|exists:eps,id',
-          
+             
         ]);
 
         if ($validator->fails()) {

@@ -9,7 +9,6 @@ class Cubiculo extends Model
 {
     use HasFactory;
 
-    // Opcional (coincide con tu migración)
     protected $table = 'cubiculos';
 
     protected $fillable = [
@@ -21,15 +20,27 @@ class Cubiculo extends Model
         'capacidad',
     ];
 
-    // Si luego usas relación con Cita:
-     public function doctores()
+    // Relación con doctores
+    public function doctores()
     {
         return $this->hasMany(Doctor::class, 'cubiculo_id');
     }
 
-    // Un cubículo puede tener muchas citas
+    // Relación con citas
     public function citas()
     {
         return $this->hasMany(Cita::class, 'cubiculo_id');
+    }
+
+    // Scope para cubículos disponibles
+    public function scopeDisponible($query)
+    {
+        return $query->where('estado', 'disponible');
+    }
+
+    // Scope para filtrar por tipo
+    public function scopePorTipo($query, $tipo)
+    {
+        return $query->where('tipo', $tipo);
     }
 }

@@ -15,6 +15,7 @@ class RoleController extends Controller
         return response()->json(['roles' => $roles]);
     }
 
+    
     public function store(Request $request){
         $validated = Validator::make($request->all(),[
             'role' => 'required|string'

@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
@@ -36,26 +38,52 @@ class MultiGuardJWTMiddleware
         }
     }
 
+    // Allow refresh and me endpoints without full authentication
+    if ($request->is('api/refresh') || $request->is('api/me')) {
+        Log::info('🔍 DEBUG MIDDLEWARE - Allowing refresh/me endpoint');
+        return $next($request);
+    }
+
     try {
         $token = \Tymon\JWTAuth\Facades\JWTAuth::getToken();
-        if (!$token) return response()->json(['Error' => 'Falta el token (Authorization: Bearer)'], 401);
+        if (!$token) {
+            Log::warning('🔍 DEBUG MIDDLEWARE - Token no encontrado en headers');
+            return response()->json(['Error' => 'Falta el token (Authorization: Bearer)'], 401);
+        }
     } catch (JWTException $e) {
+        Log::warning('🔍 DEBUG MIDDLEWARE - JWTException al obtener token', ['error' => $e->getMessage()]);
         return response()->json(['Error' => 'Token ausente o mal formado'], 401);
     }
 
-    foreach ($guards as $guard) {
-        try {
-            // Configurar el guard para usar el token
-            JWTAuth::setToken($token);
-            $user = JWTAuth::authenticate();
+    Log::info('🔍 DEBUG MIDDLEWARE - Token encontrado, probando guards', [
+        'guards_to_try' => $guards,
+        'token_preview' => substr($token, 0, 20) . '...'
+    ]);
 
-            if ($user) {
-                $request->merge(['jwt_user' => $user, 'jwt_guard' => $guard]);
-                auth()->shouldUse($guard);
-                return $next($request);
-            }
-        } catch (\Throwable $e) { /* probar siguiente guard */ }
-    }
+    foreach ($guards as $guard) {
+          try {
+              Log::info("🔍 DEBUG MIDDLEWARE - Probando guard: {$guard}");
+
+              // Verificar si el guard puede autenticar al usuario
+              if (Auth::guard($guard)->check()) {
+                  $user = Auth::guard($guard)->user();
+                  Log::info("🔍 DEBUG MIDDLEWARE - Usuario autenticado en guard: {$guard}", [
+                      'user_id' => $user->id,
+                      'user_email' => $user->email,
+                      'user_rol_id' => $user->rol_id ?? 'no_rol_id'
+                  ]);
+                  $request->merge(['jwt_user' => $user, 'jwt_guard' => $guard]);
+                  auth()->shouldUse($guard);
+                  return $next($request);
+              } else {
+                  Log::info("🔍 DEBUG MIDDLEWARE - Guard {$guard} no pudo autenticar usuario");
+              }
+          } catch (\Throwable $e) {
+              Log::info("🔍 DEBUG MIDDLEWARE - Error en guard {$guard}", ['error' => $e->getMessage()]);
+          }
+      }
+
+    Log::warning('🔍 DEBUG MIDDLEWARE - Ningún guard pudo autenticar el token');
     return response()->json(['Error' => 'Token inválido'], 401);
 }
 

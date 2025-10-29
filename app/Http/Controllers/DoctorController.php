@@ -59,14 +59,22 @@ class DoctorController extends Controller
             'email' => 'email|unique:doctores,email,' . $doctor->id,
             'telefono' => 'nullable|string|max:20',
             'especialidad_id' => 'exists:especialidades,id',
-            'cubiculo_id' => 'nullable|exists:cubiculos,id'
+            'cubiculo_id' => 'nullable|exists:cubiculos,id',
+            'password' => 'nullable|string|min:4'
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $doctor->update($request->all());
+        $data = $request->all();
+
+        // Hash password if provided
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        $doctor->update($data);
         $doctor->load('especialidad');
         return response()->json($doctor);
     }

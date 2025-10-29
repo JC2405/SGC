@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Horarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class HorarioController extends Controller
 {
     //
     public function index()
     {
-        $horarios = Horarios::all();
+        $horarios = Horarios::with('doctor.especialidad')->get();
 
         return response()->json(['horarios' => $horarios]);
     }
@@ -66,7 +67,7 @@ class HorarioController extends Controller
         return response()->json([
             'message' => 'Horario creado correctamente',
             'success' => true,
-            'horario' => $crearHorario->load('doctor')
+            'horario' => $crearHorario->load('doctor.especialidad')
         ]);
     }
 
@@ -151,5 +152,78 @@ class HorarioController extends Controller
             ->get();
 
         return response()->json(['horarios' => $horarios]);
+    }
+
+    /**
+     * Obtener horas disponibles para un doctor en una fecha específica
+     */
+    public function horasDisponibles(Request $request, $doctor_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'fecha' => 'required|date|after_or_equal:today',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $fecha = $request->fecha;
+        $diaSemana = Carbon::parse($fecha)->format('l'); // Obtener el día de la semana en inglés
+
+        // Mapear días de la semana al formato español usado en la BD
+        $diasMap = [
+            'Monday' => 'lunes',
+            'Tuesday' => 'martes',
+            'Wednesday' => 'miercoles',
+            'Thursday' => 'jueves',
+            'Friday' => 'viernes',
+            'Saturday' => 'sabado',
+            'Sunday' => 'domingo'
+        ];
+
+        $diaEspanol = $diasMap[$diaSemana] ?? $diaSemana;
+
+        // Obtener horarios del doctor para ese día
+        $horarios = Horarios::where('doctor_id', $doctor_id)
+            ->where('dia', $diaEspanol)
+            ->where('estado', 'activo')
+            ->orderBy('hora_inicio', 'asc')
+            ->get();
+
+        if ($horarios->isEmpty()) {
+            return response()->json(['horas_disponibles' => []]);
+        }
+
+        $horasDisponibles = [];
+
+        foreach ($horarios as $horario) {
+            // Generar horas cada 30 minutos entre hora_inicio y hora_fin
+            $horaInicio = Carbon::createFromFormat('H:i:s', $horario->hora_inicio);
+            $horaFin = Carbon::createFromFormat('H:i:s', $horario->hora_fin);
+
+            $horaActual = $horaInicio->copy();
+
+            while ($horaActual->lessThan($horaFin)) {
+                $horaCompleta = $fecha . ' ' . $horaActual->format('H:i:s');
+
+                // Verificar si ya hay una cita en esa hora
+                $citaExistente = \App\Models\Cita::where('doctor_id', $doctor_id)
+                    ->where('fecha_hora', $horaCompleta)
+                    ->whereIn('estado', ['pendiente', 'confirmada'])
+                    ->exists();
+
+                if (!$citaExistente) {
+                    $horasDisponibles[] = [
+                        'id' => $horaActual->format('H:i:s'),
+                        'hora_completa' => $horaCompleta,
+                        'hora_display' => $horaActual->format('H:i')
+                    ];
+                }
+
+                $horaActual->addMinutes(30); // Intervalos de 30 minutos
+            }
+        }
+
+        return response()->json(['horas_disponibles' => $horasDisponibles]);
     }
 }

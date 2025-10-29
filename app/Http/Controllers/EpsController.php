@@ -14,25 +14,31 @@ class EpsController extends Controller
     {
         $eps = Eps::activas()->get();
         return response()->json($eps);
-    }
+   }
 
     /**
      * Crear nueva EPS
      */
+   
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255|unique:eps',
-            'codigo' => 'required|string|max:10|unique:eps',
-            'nit' => 'required|string|max:20|unique:eps',
-            'telefono' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'direccion' => 'nullable|string',
-            'estado' => 'in:activa,inactiva'
-        ]);
+    $validated = $request->validate([
+        'nombre' => 'required|string|max:255|unique:eps',
+        'codigo' => 'required|string|max:10|unique:eps',
+        'nit' => 'required|string|max:20|unique:eps',
+        'telefono' => 'nullable|string|max:20',
+        'email' => 'nullable|email|max:255',
+        'direccion' => 'nullable|string',
+        'estado' => 'in:activa,inactiva'
+    ]);
 
-        $eps = Eps::create($request->all());
-        return response()->json($eps, 201);
+    // Se usa $validated para evitar insertar campos no permitidos
+    $eps = Eps::create($validated);
+
+    return response()->json([
+        'message' => 'EPS creada exitosamente',
+        'data' => $eps
+    ], 201);
     }
 
     /**

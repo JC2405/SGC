@@ -4,68 +4,70 @@ namespace App\Http\Controllers;
 
 use App\Models\Cubiculo;
 use Illuminate\Http\Request;
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Cubiculo;
+use Illuminate\Support\Facades\Log;
 
 class CubiculosController extends Controller
 {
     public function index()
     {
-        return response()->json(Cubiculo::all());
+        Log::info('CubiculosController@index: Iniciando listado de cubículos');
+        try {
+            $cubiculos = Cubiculo::all();
+            Log::info('CubiculosController@index: Cubículos obtenidos', ['count' => $cubiculos->count()]);
+            return response()->json($cubiculos);
+        } catch (\Exception $e) {
+            Log::error('CubiculosController@index: Error obteniendo cubículos', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Error interno del servidor'], 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'numero'       => 'required|string|max:10|unique:cubiculos,numero',
-            'nombre'       => 'nullable|string|max:255',
-            'tipo'         => 'required|in:consulta,procedimientos,emergencia',
+        Log::info('Store method called', ['data' => $request->all()]);
+        $request->validate([
+            'numero' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255',
+            'tipo' => 'required|string|max:255',
             'equipamiento' => 'nullable|string',
-            'estado'       => 'nullable|in:disponible,ocupado,mantenimiento',
-            'capacidad'    => 'nullable|integer|min:1'
+            'estado' => 'required|string|max:255',
+            'capacidad' => 'required|integer|min:1',
         ]);
-
-        $cubiculo = Cubiculo::create($validated);
+        $cubiculo = Cubiculo::create($request->all());
         return response()->json($cubiculo, 201);
     }
 
     public function show($id)
     {
-        // Si no necesitas las citas, puedes quitar el with('citas')
-        $cubiculo = Cubiculo::with('citas')->findOrFail($id);
+        $cubiculo = Cubiculo::find($id);
+        if (!$cubiculo) {
+            return response()->json(['message' => 'Cubiculo not found'], 404);
+        }
         return response()->json($cubiculo);
     }
 
     public function update(Request $request, $id)
     {
-        $cubiculo  = Cubiculo::findOrFail($id);
-
-        $validated = $request->validate([
-            'numero'       => 'sometimes|string|max:10|unique:cubiculos,numero,' . $id,
-            'nombre'       => 'sometimes|nullable|string|max:255',
-            'tipo'         => 'sometimes|in:consulta,procedimientos,emergencia',
-            'equipamiento' => 'sometimes|nullable|string',
-            'estado'       => 'sometimes|in:disponible,ocupado,mantenimiento',
-            'capacidad'    => 'sometimes|integer|min:1'
-        ]);
-
-        $cubiculo->update($validated);
+        $cubiculo = Cubiculo::find($id);
+        if (!$cubiculo) {
+            return response()->json(['message' => 'Cubiculo not found'], 404);
+        }
+        $cubiculo->update($request->all());
         return response()->json($cubiculo);
     }
 
     public function destroy($id)
     {
-        $cubiculo = Cubiculo::findOrFail($id);
+        $cubiculo = Cubiculo::find($id);
+        if (!$cubiculo) {
+            return response()->json(['message' => 'Cubiculo not found'], 404);
+        }
         $cubiculo->delete();
-
-        return response()->json(['message' => 'Cubículo eliminado correctamente']);
+        return response()->json(['message' => 'Cubiculo deleted']);
     }
 
     public function disponibles()
     {
-        return response()->json(Cubiculo::disponibles()->get());
+        return response()->json(Cubiculo::disponible()->get());
     }
 
     public function porTipo($tipo)
