@@ -14,7 +14,10 @@ use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UsuariosController;
 
-
+        
+        Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy']);
+        Route::get('eps/inactivas/list', [EpsController::class, 'inactivas']);
+        Route::post("crearrol", [RoleController::class, 'store']);
 // Usuarios
         Route::post('register', [AuthController::class, 'crearUsuario']);
         Route::get('listarUsuariosAuth', [AuthController::class, 'listarUsuarios']);
@@ -40,7 +43,11 @@ Route::post("crearUsuarioPaciente", [UsuariosController::class, 'crearUsuarioPac
 Route::post("creacionDeAdmin", [AuthController::class, 'creacionDeAdmins']);
 Route::post("logout", [AuthController::class, 'logout']);
 Route::get("me", [AuthController::class, 'me']);
+Route::get('eps/activas/list', [EpsController::class, 'activas']);
        
+        Route::post('CrearUsuarioDoctor', [DoctorController::class, 'crearUsuarioDoctor']);
+        Route::post("crearCubiculo", [CubiculosController::class, 'store']);
+        Route::post("creacionDeAdmin", [AuthController::class, 'creacionDeAdmins']);
 
 /*
 |--------------------------------------------------------------------------
@@ -57,7 +64,6 @@ Route::middleware(['jwt.multiguard'])->group(function () {
     Route::middleware(['rol:admin,doctor,paciente'])->group(function () {
         Route::get("usuario/{id}", [UsuariosController::class, 'show']);
         Route::post("refresh", [AuthController::class, 'refresh']);
-        Route::get('eps/activas/list', [EpsController::class, 'activas']);
         Route::get("listarDoctores", [DoctorController::class, 'index']);
         Route::get("listarEspecialidades", [EspecialidadesController::class, 'index']);
         Route::get("horariosDisponibles/{doctor_id}", [HorarioController::class, 'horasDisponibles']);
@@ -71,11 +77,9 @@ Route::middleware(['jwt.multiguard'])->group(function () {
     Route::middleware(['rol:admin'])->group(function () {
             
         // Roles ckeck 
-        Route::post("crearrol", [RoleController::class, 'store']);
         Route::get('indexRol',[RoleController::class,'index']);
         
         //Admin
-        Route::post("creacionDeAdmin", [AuthController::class, 'creacionDeAdmins']);
         Route::put("editarAdmin/{id}",[AuthController::class,'editarAdmin']);
         Route::delete("eliminarAdmin/{id}",[AuthController::class,'eliminarAdmin']);
 
@@ -92,13 +96,10 @@ Route::middleware(['jwt.multiguard'])->group(function () {
 
       
         // EPS check
-        Route::apiResource('eps', EpsController::class)->only(['index','store','show','update','destroy']);
-        Route::get('eps/inactivas/list', [EpsController::class, 'inactivas']);
         Route::patch('eps/cambiar-estado/{id}', [EpsController::class, 'cambiarEstado']);
 
         // Cubículos check
         Route::get("listarCubiculos", [CubiculosController::class, 'index']);
-        Route::post("crearCubiculo", [CubiculosController::class, 'store']);
         Route::get("cubiculo/{id}", [CubiculosController::class, 'show']);
         Route::put("actualizarCubiculo/{id}", [CubiculosController::class, 'update']);
         Route::delete("eliminarCubiculo/{id}", [CubiculosController::class, 'destroy']);
@@ -113,7 +114,6 @@ Route::middleware(['jwt.multiguard'])->group(function () {
         Route::delete('eliminarHorario/{id}', [HorarioController::class, 'destroy']);
        
         // Doctores check
-        Route::post('CrearUsuarioDoctor', [DoctorController::class, 'crearUsuarioDoctor']);
          //  Route::post("crearDoctor", [DoctorController::class, 'store']); store sin parametros necesarios
         Route::put("actualizarDoctor/{id}", [DoctorController::class, 'update']);
         Route::delete("eliminarDoctor/{id}", [DoctorController::class, 'destroy']);

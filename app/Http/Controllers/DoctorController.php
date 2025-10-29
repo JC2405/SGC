@@ -8,6 +8,9 @@ use App\Models\Doctor; // Corregido nombre del modelo
 use Illuminate\Container\Attributes\Auth;
 use PhpParser\Comment\Doc;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
+use Illuminate\Support\Facades\Log;
 
 class DoctorController extends Controller
 {
@@ -127,6 +130,13 @@ class DoctorController extends Controller
        'cubiculo_id'     => $request->cubiculo_id,
        'rol_id'          => $request->rol_id,
    ]);
+
+   // Enviar email de bienvenida
+   try {
+       Mail::to($doctor->email)->send(new WelcomeEmail($doctor, 'doctor'));
+   } catch (\Exception $e) {
+       Log::error('Error al enviar email de bienvenida al doctor: ' . $e->getMessage());
+   }
 
    return response()->json([
        'success' => true,

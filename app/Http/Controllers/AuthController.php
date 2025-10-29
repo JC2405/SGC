@@ -11,6 +11,8 @@ use App\Models\Doctor;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
 
 class AuthController extends Controller
 {
@@ -48,6 +50,13 @@ class AuthController extends Controller
             'rol_id' => $request->rol_id,
         ]);
 
+        // Enviar email de bienvenida
+        try {
+            Mail::to($usuario->email)->send(new WelcomeEmail($usuario, 'paciente'));
+        } catch (\Exception $e) {
+            Log::error('Error al enviar email de bienvenida al paciente: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Usuario agregado correctamente',
@@ -80,6 +89,13 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'rol_id' => 1, // 👈 rol por defecto (administrador)
             ]);
+
+            // Enviar email de bienvenida
+            try {
+                Mail::to($admin->email)->send(new WelcomeEmail($admin, 'admin'));
+            } catch (\Exception $e) {
+                Log::error('Error al enviar email de bienvenida al admin: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success' => true,

@@ -38,9 +38,9 @@ class MultiGuardJWTMiddleware
         }
     }
 
-    // Allow refresh and me endpoints without full authentication
-    if ($request->is('api/refresh') || $request->is('api/me')) {
-        Log::info('🔍 DEBUG MIDDLEWARE - Allowing refresh/me endpoint');
+    // Allow refresh, me, and eps/activas/list endpoints without full authentication
+    if ($request->is('api/refresh') || $request->is('api/me') || $request->is('api/eps/activas/list')) {
+        Log::info('🔍 DEBUG MIDDLEWARE - Allowing refresh/me/eps endpoint');
         return $next($request);
     }
 

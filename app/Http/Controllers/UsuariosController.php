@@ -6,8 +6,10 @@ use App\Models\Usuario;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Mail\WelcomeEmail;
 
 class UsuariosController extends Controller
 {   
@@ -91,8 +93,8 @@ public function crearUsuarioPaciente(Request $request)
         $validated = Validator::make($request->all(), [
         'nombre' => 'required|string|max:255',
         'apellido' => 'required|string|max:255',
-        'documento_identidad' => 'required|string|max:255|unique:usuarios',
-        'email' => 'required|string|email|max:255|unique:usuarios',
+        'documento_identidad' => 'required|string|max:255|unique:usuarios,documento_identidad',
+        'email' => 'required|string|email|max:255|unique:usuarios,email',
         'password' => 'required|string|min:8',
         'telefono' => 'nullable|string|max:20',
         'fecha_nacimiento' => 'required|date',
@@ -119,6 +121,10 @@ public function crearUsuarioPaciente(Request $request)
             'eps_id' => $request->eps_id,
             'rol_id' => $request->rol_id,
         ]);
+
+        // Enviar correo de bienvenida
+        $userType = $usuario->rol->role ?? 'paciente'; // Usando el campo 'role' del modelo Roles
+        Mail::to($usuario->email)->send(new WelcomeEmail($usuario, $userType));
 
         return response()->json([
             "success" => true,
